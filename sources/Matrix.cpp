@@ -1,3 +1,7 @@
+/*---------------------------------------------------
+  Guy Gur-Arieh  -  System Software B  -  Exercise 3B
+  ---------------------------------------------------*/
+
 #include "Matrix.hpp"
 #include <stdexcept>
 
