@@ -55,7 +55,7 @@ namespace zich{
             //(throws an exception if otherwise)
             
             friend ostream& operator<<(ostream&, const Matrix&); //cout << Matrix
-            friend istream& operator>>(istream&, Matrix&); //cin>> Matrix
+            friend istream& operator>>(istream&, Matrix&); //cin >> Matrix
 
             friend Matrix operator+(const double, Matrix&); //number + Matrix
             friend Matrix operator-(const double, Matrix&); //number - Matrix
