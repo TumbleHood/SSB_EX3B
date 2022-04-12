@@ -249,60 +249,60 @@ ostream& zich::operator<<(ostream& os, const Matrix& matrix){
 
 istream& zich::operator>>(istream& is, Matrix& matrix){
     //Take input from the user and create a matrix
-    string s;
-    getline(is, s); //get the intire input
+    string input;
+    getline(is, input); //get the intire input
 
-    unsigned int columns = 1;
-    unsigned int rows = 1;
+    unsigned int columns = 0;
+    unsigned int rows = 0;
+
+    //these 2 values will be used to check that each row has the same amount of values
     unsigned int current_columns = 0;
+    bool first_iteration = true;
 
-    for (unsigned int i = 0; i < s.length()-1; i++){
-        if (s.at(i) == ' '){
-            columns++;
-        }
-        if (s.at(i) == '['){
-            if (s.at(i+1) == '[' || s.at(i+1) == ' ' || s.at(i+1) == ']' || s.at(i+1) == ',' || s.at(i+1) == '\n'){
-                throw invalid_argument("Must have a number after \"[\"!");
-            }
-        }
-        if (s.at(i) == ']' && i < s.length() && s.at(i+1) != ','){
-            throw invalid_argument("Must have a comma after \"]\"!");
-        }
-        if (s.at(i) == ','){
-            if (s.at(++i) != ' '){
-                throw invalid_argument("Must have a space after comma!");
-            }
-            rows++;
-            if (current_columns == 0){
-                current_columns = columns;
-            }
-            else if (columns != current_columns){
-                throw invalid_argument("Number of values per row is inconsistent!");
-            }
-            columns = 1;
-        }
-    }
+    unsigned int i = 0; //iterator
+    vector<double> values = {};
 
-    vector<double> values(rows * columns, 0);
-
-    unsigned int i = 0;
-    string word;
-    for (unsigned int x = 0; x < s.length(); x++){
-        if (s.at(x) == ' ' || s.at(x) == '[' || s.at(x) == ']' || s.at(x) == ',' || s.at(x) == '\n'){
-            try{
-                values.at(i++) = stod(word);
-            }
-            catch (invalid_argument e){
-                word = "";
-            }
-            word = "";
+    //since we had to follow very strict input rules there are many if cases
+    while (i < input.length() - 1){
+        if (input.at(i) != '['){//each row must start with "["
+            throw invalid_argument("Please follow this pattern: \'[<num> <num> <num> <...> <num>], [...]\'.");
         }
         else{
-            word += s.at(x);
+            while (input.at(i++) != ']'){
+                string number;
+                while (input.at(i) != ' ' && input.at(i) != ']'){ //go over the string until you reach a space or end of row
+                    number += input.at(i++);
+                }
+                try{
+                    values.push_back(stod(number)); //convert number to double and add it to the vector
+                }
+                catch (invalid_argument e){ 
+                    //if you reached this catch, it means there is an extra space,
+                    //which means "number" is empty, or there is a special character in the way
+                    throw invalid_argument(
+                        "Make sure there are no spare blank spaces and/or special characters other than \'[\', \']\', \',\'.");
+                }
+                columns++;
+            }
+            if (first_iteration){ //set the number of values per row (columns)
+                current_columns = columns;
+                first_iteration = false;
+            }
+            else if (columns != current_columns){ //if there is an inconsistent number of columns
+                throw invalid_argument("Inconsistent number of values per row!");
+            }
+            rows++;
+            columns = 0;
+            if (i < input.length() - 1){ //if we haven't reached the end of the string it means there are more rows
+                if (input.at(i) != ',' || input.at(i+1) != ' '){ //each row must be seperated by a comma, then a space
+                    throw invalid_argument("Please follow this pattern: \'[<num> <num> <num> <...> <num>], [...]\'.");
+                }
+                i += 2;
+            }
         }
     }
 
-    matrix = Matrix(values, (int)rows, (int)columns);
+    matrix = Matrix(values, (int)rows, (int)current_columns); //create the new matrix
 
     return is;
 }
